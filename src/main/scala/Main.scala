@@ -1,6 +1,9 @@
 object Main {
 
-  class Plant(val plantName: String,val generatedEnergy: Double) {
+  val ANSI_RESET = "\u001B[0m"
+  val ANSI_GREEN = "\u001B[32m"
+
+  class Plant(val plantName: String, generatedEnergy: Double) {
     var quality = 100
 
     def isGoodQuality: Boolean = true
@@ -15,18 +18,18 @@ object Main {
     }
   }
 
-  class HydropowerPlant(plantName: String, generatedEnergy: Double) extends Plant(plantName, generatedEnergy) {
+  class HydropowerPlant(plantName: String,var generatedEnergy: Double) extends Plant(plantName, generatedEnergy) {
 
     var turbineSpeed = 100
 
-    def increaseTurbineSpeed(speed: Double): String = {
+    def increaseTurbineSpeed: Unit = {
       turbineSpeed = turbineSpeed + 10
-      s"increase turbine speed on 10%"
+      println(ANSI_GREEN+"Increase turbine speed on 10%."+ANSI_RESET)
     }
 
-    def reduceTurbineSpeed(speed: Double): String = {
+    def reduceTurbineSpeed: Unit = {
       turbineSpeed = turbineSpeed - 10
-      s"reduce turbine speed on 10%"
+      println(ANSI_GREEN+"Reduce turbine speed on 10%."+ANSI_RESET)
     }
 
     override def isGoodQuality: Boolean = {
@@ -43,47 +46,57 @@ object Main {
     }
 
     override def generateEnergy(): Double = {
+      generatedEnergy = generatedEnergy * quality / 100 * turbineSpeed / 100
       decrementQuality()
-      generatedEnergy*quality/100*turbineSpeed/100
+      generatedEnergy
     }
   }
 
+  // fix error with non int input
   def hydropowerControlMenu(plants: Array[HydropowerPlant]): Unit = {
     println("Choose Hydropower plant:")
     for ((plant, index) <- plants.zipWithIndex) {
       println(s"${index + 1}. ${plant.plantName}")
     }
+    print("Plant number: ")
     val userPlantInput = scala.io.StdIn.readInt()
-    if (userPlantInput >= 1 && userPlantInput <= plants.length) {
+    var generatedEnergy: Double = 0
+    while (userPlantInput >= 1 && userPlantInput <= plants.length) {
       val selectedPlant = plants(userPlantInput - 1)
 
-      println("\n")
-      println("Choose option :\n" +
+      println("Choose "+selectedPlant.plantName+" command option :\n" +
         "1) Check quality.\n" +
         "2) Generate Energy.\n" +
         "3) Increase turbine speed.\n" +
         "4) Reduce turbine speed.\n" +
         "5) Disconnect plant.\n" +
-        "Enter any other button to exit.\n")
-      println("Command:")
+        "Enter any other button to exit.")
+      print("Command: ")
       val userChoiceInput = scala.io.StdIn.readInt()
+      println("")
       userChoiceInput match {
         case 1 =>{
-          println("Quality of plant: "+selectedPlant.plantName+" is " + selectedPlant.quality+". ")
+          println(ANSI_GREEN+"Quality of plant: "+selectedPlant.plantName+" is " + selectedPlant.quality+". "+ANSI_RESET)
         }
         case 2 =>{
-          selectedPlant.generateEnergy()
-          println("Generated quality of plant: "+selectedPlant.plantName+" is " + selectedPlant.generatedEnergy+". ")
+          generatedEnergy = generatedEnergy + selectedPlant.generateEnergy()
+          println(ANSI_GREEN+"Generated energy of plant: "+selectedPlant.plantName+" is " + selectedPlant.generatedEnergy+". "+ANSI_RESET)
         }
-        case 3 =>{}
-        case 4 =>{}
-        case 5 =>{}
-        case 6 =>{}
-        case 7 =>{}
+        case 3 =>{
+          selectedPlant.increaseTurbineSpeed;
+          println(ANSI_GREEN+"Increased turbine speed of plant: "+selectedPlant.plantName+". "+ANSI_RESET)
+        }
+        case 4 =>{
+          selectedPlant.reduceTurbineSpeed;
+          println(ANSI_GREEN+"Reduce turbine speed of plant: "+selectedPlant.plantName+". "+ANSI_RESET)
+        }
+        case 5 =>{
+          //
+          println(ANSI_GREEN+"Disconnect plant: "+selectedPlant.plantName+" out of the system. "+ANSI_RESET)
+        }
       }
+      println("")
 
-    } else {
-      println("Invalid selection.")
     }
   }
 
@@ -93,5 +106,6 @@ object Main {
     val hydropowerPlant2 = new HydropowerPlant("HPP-2", 200)
     val hydropowerPlant3 = new HydropowerPlant("HPP-3", 300)
 
+    hydropowerControlMenu(Array(hydropowerPlant1, hydropowerPlant2, hydropowerPlant3))
   }
 }
