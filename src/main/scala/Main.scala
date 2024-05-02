@@ -64,13 +64,13 @@ object Main {
     while (userPlantInput >= 1 && userPlantInput <= plants.length) {
       val selectedPlant = plants(userPlantInput - 1)
 
-      println("Choose "+selectedPlant.plantName+" command option :\n" +
+      println("\nChoose "+selectedPlant.plantName+" command option:\n" +
         "1) Check quality.\n" +
         "2) Generate Energy.\n" +
         "3) Increase turbine speed.\n" +
         "4) Reduce turbine speed.\n" +
         "5) Disconnect plant.\n" +
-        "Enter any other button to exit.")
+        "Enter any other number to exit.")
       print("Command: ")
       val userChoiceInput = scala.io.StdIn.readInt()
       println("")
@@ -93,6 +93,11 @@ object Main {
         case 5 =>{
           //
           println(ANSI_GREEN+"Disconnect plant: "+selectedPlant.plantName+" out of the system. "+ANSI_RESET)
+        }
+
+        case _ =>{
+          //
+          hydropowerControlMenu(plants)
         }
       }
       println("")
