@@ -95,7 +95,7 @@ object Menus {
       isEventContainerEvents = true
     }
 
-    var list = "all"
+    var list = "all" 
     if (!isEventContainerEvents) {
       list = "filtered"
     }
