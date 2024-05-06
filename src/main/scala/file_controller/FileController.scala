@@ -69,7 +69,7 @@ class FileController(filePath: String) { //  class for which works with files
       rows.map(_.mkString(", ")).mkString("\n")
     } catch {
       case NonFatal(e) =>
-        println(s"Error reading data from file: ${e.getMessage}")
+        println(s"Error reading data from file1: ${e.getMessage}")
         ""
     } finally {
       csvReader.close()
@@ -79,19 +79,25 @@ class FileController(filePath: String) { //  class for which works with files
     val csvReader = CSVReader.open(filePath)
     try {
     val rows = csvReader.all()
-    // Skip header line
     val dataRows = rows.drop(1)
     dataRows.map { row =>
+    //  println("1")
     val Array(plantName, type_, dateString, energyStr, capacityStr, qualityStr) = row.toArray
+     // println("2")
     val date = LocalDateTime.parse(dateString)
+      //println("3")
     val energy = energyStr.toInt
+      //println("4")
     val capacity = capacityStr.split("/")(0).toInt
+     // println("5")
     val quality = qualityStr.toInt
+      //println("6")
     EventContainer.addEvent( new Event(plantName,type_,date,energy,capacity,quality))
+      //println("7")
   }.toArray
   } catch {
     case NonFatal(e) =>
-    println(s"Error reading data from file: ${e.getMessage}")
+    println(s"Error reading data from file2: ${e.getMessage}")
   } finally {
     csvReader.close()
   }
@@ -138,7 +144,7 @@ class FileController(filePath: String) { //  class for which works with files
       }
     } catch {
       case NonFatal(e) =>
-        println(s"Error reading data from file: ${e.getMessage}")
+        println(s"Error reading data from file3: ${e.getMessage}")
     }
 
     Array(solarPowerSystem, windPowerSystem, hydroPowerSystem);
