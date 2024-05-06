@@ -5,7 +5,7 @@ object GlobalValues {
   var ANSI_GREEN = "\u001B[32m"
   var ANSI_RED = "\u001B[31m"
   var defaultStorageCapacity = 1000
-  var storageCapacity = 1000
+  var storageCapacity = 1000 // current
 
 
   def setDefaultStorageCapacity(newCapacity: Int): Unit = {

@@ -3,9 +3,12 @@ import menu.Menus.menu
 import plant.HydropowerPlant
 import system.{EnergyPowerSystem}
 
+
+//Aleksandr Ivanov
 object Main {
 
   def main(args: Array[String]): Unit = {
+
     // PLANTS WITH SAME NAMES ARE FORBIDDEN
 
     val fileController = new FileController("data.csv")

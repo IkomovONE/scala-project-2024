@@ -34,7 +34,7 @@ class HydropowerPlant(plantName: String, var generatedEnergy: Int) extends Plant
     decrementQuality()
     totalGeneratedEnergy = totalGeneratedEnergy + generatedEnergy
     if(isGoodQuality){
-      print(ANSI_RED+"WARNING: The quality of the plant is low. It is recommended to disconnect it."+ANSI_RESET)
+      print(ANSI_RED+"WARNING: The quality of the plant is low. It is recommended to disconnect it.\n"+ANSI_RESET)
     }
     generatedEnergy
   }
