@@ -1,7 +1,7 @@
 import file_controller.FileController
 import menu.Menus.menu
 import plant.HydropowerPlant
-import system.HydropowerSystem
+import system.{EnergyPowerSystem}
 
 object Main {
 
@@ -9,7 +9,9 @@ object Main {
 
     val fileController = new FileController("data.csv")
 
-    val hydropowerSystem = new HydropowerSystem
+    val hydropowerSystem = new EnergyPowerSystem
+    val solarpowerPlant = new EnergyPowerSystem
+    val windpowerPlant = new EnergyPowerSystem
 
     val hydropowerPlant1 = new HydropowerPlant("HPP-1", 100)
     val hydropowerPlant2 = new HydropowerPlant("HPP-2", 200)
@@ -20,6 +22,6 @@ object Main {
     hydropowerSystem.addPlant(hydropowerPlant3)
 
 
-    menu(fileController, hydropowerSystem)
+    menu(fileController, hydropowerSystem,solarpowerPlant,windpowerPlant)
   }
 }

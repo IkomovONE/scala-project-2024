@@ -3,16 +3,16 @@ package menu
 import file_controller.FileController
 import glob_val.GlobalValues.{ANSI_GREEN, ANSI_RESET, storageCapacity}
 import plant.HydropowerPlant
-import system.HydropowerSystem
+import system.EnergyPowerSystem
 
 import java.time.LocalDate
 import scala.util.Try
 import scala.util.control.Breaks.{break, breakable}
 
 object Menus {
-  def hydropowerControlMenu(system: HydropowerSystem, fileController: FileController): Unit = {
+  def hydropowerControlMenu(system: EnergyPowerSystem, fileController: FileController): Unit = {
     println("Choose Hydropower plant:")
-    val plants = system.hydropowerPlants
+    val plants = system.plants
     for ((plant, index) <- plants.zipWithIndex) {
       println(s"${index + 1}. ${plant.plantName}")
     }
@@ -26,7 +26,10 @@ object Menus {
 
     breakable {
       while (userPlantInput >= 1 && userPlantInput <= plants.length) {
-        val selectedPlant: HydropowerPlant = plants(userPlantInput - 1)
+
+        val selectedPlant: HydropowerPlant = plants(userPlantInput - 1).asInstanceOf[HydropowerPlant]
+
+
 
         println(s"Choose ${selectedPlant.plantName} command option :\n" +
           "1) Check quality.\n" +
@@ -112,7 +115,7 @@ object Menus {
 
   }
 
-  def menu(fileController: FileController, hydropowerSystem: HydropowerSystem): Unit = {
+  def menu(fileController: FileController, hydropowerSystem: EnergyPowerSystem,solarpowerSystem: EnergyPowerSystem,windpowerSystem: EnergyPowerSystem): Unit = {
     // main menu options
     println("THIS IS REPS COMMANDS CONTROL")
     println("Enter the number of the command what you need:")
@@ -127,19 +130,19 @@ object Menus {
     input match {
       case "1" =>
         // solar
-        menu(fileController, hydropowerSystem)
+        menu(fileController, hydropowerSystem,solarpowerSystem,windpowerSystem)
       case "2" =>
         // wind
-        menu(fileController, hydropowerSystem)
+        menu(fileController, hydropowerSystem,solarpowerSystem,windpowerSystem)
       case "3" =>
         hydropowerControlMenu(hydropowerSystem, fileController)
-        menu(fileController, hydropowerSystem)
+        menu(fileController, hydropowerSystem,solarpowerSystem,windpowerSystem)
       case "4" =>
         storageControlMenu(fileController,null)
-        menu(fileController, hydropowerSystem)
+        menu(fileController, hydropowerSystem,solarpowerSystem,windpowerSystem)
       case "5" =>
         dataControlMenu(fileController)
-        menu(fileController, hydropowerSystem)
+        menu(fileController, hydropowerSystem,solarpowerSystem,windpowerSystem)
       case _ => // nothing
     }
   }

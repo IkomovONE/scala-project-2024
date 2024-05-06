@@ -1,6 +1,6 @@
 package plant
 
-class Plant(val plantName: String, generatedEnergy: Int) { // abstract class for all plants
+class Plant(val plantName: String, generatedEnergy: Int) { // parent class for all plants
   var quality = 100
   var totalGeneratedEnergy: Int = 0
 

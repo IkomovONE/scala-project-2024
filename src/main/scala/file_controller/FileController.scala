@@ -2,6 +2,8 @@ package file_controller
 
 import com.github.tototoshi.csv.{CSVReader, CSVWriter}
 import glob_val.GlobalValues.{defaultStorageCapacity, storageCapacity}
+import plant.HydropowerPlant
+import system.EnergyPowerSystem
 
 import java.io.File
 import java.time.LocalDate
@@ -70,5 +72,35 @@ class FileController(filePath: String) { //  class for which works with files
     } finally {
       csvReader.close()
     }
+  }
+
+  def loadData(): Array[EnergyPowerSystem] = { // solar, wind hydro
+    val energyPowerSystem = new EnergyPowerSystem()
+
+    try {
+      val csvReader = CSVReader.open(outputFile)
+      val rows = csvReader.all()
+      for (row <- rows.tail) { // Skip header row
+        val cols = row.map(_.trim)
+        if (cols.length == 5) {
+          val Array(name, type_, date, energy, capacity) = cols.toArray
+          val Array(currentCapacityStr, totalCapacityStr) = capacity.split("/")
+          storageCapacity = currentCapacityStr.toInt
+          defaultStorageCapacity = totalCapacityStr.toInt
+          type_ match {
+            case "H" =>
+              val hydropowerPlant = new HydropowerPlant(name, energy.toInt)
+              energyPowerSystem.addPlant(hydropowerPlant)
+          }
+        } else {
+          println(s"Ignoring invalid row: ${cols.mkString(", ")}")
+        }
+      }
+    } catch {
+      case NonFatal(e) =>
+        println(s"Error reading data from file: ${e.getMessage}")
+    }
+
+    Array(energyPowerSystem);
   }
 }
