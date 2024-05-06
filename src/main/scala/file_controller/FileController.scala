@@ -7,7 +7,7 @@ import plant.HydropowerPlant
 import system.EnergyPowerSystem
 
 import java.io.File
-import java.time.LocalDate
+import java.time.{ LocalDateTime}
 import scala.util.control.NonFatal
 
 class FileController(filePath: String) { //  class for which works with files
@@ -52,7 +52,7 @@ class FileController(filePath: String) { //  class for which works with files
     }
   }
 
-  def writedata(name: String, eType: String, date: LocalDate, energy: Int, quality: Int): Unit = {
+  def writedata(name: String, eType: String, date: LocalDateTime, energy: Int, quality: Int): Unit = {
     val formattedDate = date.toString
     val formattedEnergy = energy.toString
     val formattedCapacity = s"${storageCapacity}/${defaultStorageCapacity}"
@@ -83,7 +83,7 @@ class FileController(filePath: String) { //  class for which works with files
     val dataRows = rows.drop(1)
     dataRows.map { row =>
     val Array(plantName, type_, dateString, energyStr, capacityStr, qualityStr) = row.toArray
-    val date = LocalDate.parse(dateString)
+    val date = LocalDateTime.parse(dateString)
     val energy = energyStr.toInt
     val capacity = capacityStr.split("/")(0).toInt
     val quality = qualityStr.toInt

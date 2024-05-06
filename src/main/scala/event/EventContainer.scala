@@ -8,5 +8,4 @@ object EventContainer {
   def addEvent(event: Event): Unit = {
     events += event
   }
-
 }

@@ -1,6 +1,6 @@
 package event
 
-import java.time.LocalDate
+import java.time.LocalDateTime
 
-class Event (plantName:String,val type_ : String,val date:LocalDate,val energy:Int,val capacity:Int, val quality:Int ){
+class Event (plantName:String,val type_ : String,val date:LocalDateTime,val energy:Int,val capacity:Int, val quality:Int ){
 }

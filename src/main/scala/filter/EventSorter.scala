@@ -1,5 +1,0 @@
-package filter
-
-object EventSorter {
-
-}

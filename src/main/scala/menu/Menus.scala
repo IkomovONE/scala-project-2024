@@ -1,11 +1,14 @@
 package menu
 
+import event.{Event, EventContainer}
 import file_controller.FileController
 import glob_val.GlobalValues.{ANSI_GREEN, ANSI_RESET, storageCapacity}
 import plant.HydropowerPlant
+import sorter.EventSorter
 import system.EnergyPowerSystem
 
-import java.time.LocalDate
+import java.time.format.DateTimeParseException
+import java.time.{LocalDate, LocalDateTime}
 import scala.util.Try
 import scala.util.control.Breaks.{break, breakable}
 
@@ -30,7 +33,6 @@ object Menus {
         val selectedPlant: HydropowerPlant = plants(userPlantInput - 1).asInstanceOf[HydropowerPlant]
 
 
-
         println(s"Choose ${selectedPlant.plantName} command option :\n" +
           "1) Check quality.\n" +
           "2) Generate Energy.\n" +
@@ -51,7 +53,7 @@ object Menus {
 
               var generatedEnergy: Int = selectedPlant.generateEnergy()
               storageCapacity = storageCapacity - generatedEnergy
-              fileController.writedata(selectedPlant.plantName, "H", LocalDate.now(), generatedEnergy,selectedPlant.quality)
+              fileController.writedata(selectedPlant.plantName, "H", LocalDateTime.now(), generatedEnergy, selectedPlant.quality)
               println(s"${ANSI_GREEN}Generated energy of plant: ${selectedPlant.plantName} is ${generatedEnergy}. ${ANSI_RESET}")
             case 3 => //Increase turbine speed
               selectedPlant.increaseTurbineSpeed
@@ -75,26 +77,33 @@ object Menus {
     }
   }
 
-  def storageControlMenu(fileController: FileController,filter:Option[String]): Unit = { // Menu of the storage commands
+  def storageControlMenu(fileController: FileController, filteredEvents: Option[Array[Event]]): Unit = { // Menu of the storage commands
+    fileController.readEvents()
+    val events = filteredEvents.getOrElse(EventContainer.events.toArray)
+    val isEventContainerEvents = events eq EventContainer.events.toArray
+    var list = "all"
+    if (isEventContainerEvents) {
+      list = "filtered"
+    }
     println("The storage contains all energy operations of the system. ")
     println("Enter the number of the command what you need:")
     println()
     println(
       "1) Show all data from the storage.\n" +
-        "2) Show Mean based on all data from the storage.\n" +
-        "3) Show Median based on all data from the storage.\n" +
-        "4) Show Mode based on all data from the storage.\n" +
-        "5) Show Range based on all data from the storage.\n" +
-        "6) Show Midrange based on all data from the storage.\n" +
+        "2) Show Mean based on " + list + " data from the storage.\n" +
+        "3) Show Median based on " + list + " data from the storage.\n" +
+        "4) Show Mode based on " + list + " data from the storage.\n" +
+        "5) Show Range based on " + list + " data from the storage.\n" +
+        "6) Show Midrange based on " + list + " data from the storage.\n" +
         "7) Define filtered list.\n"
     )
 
     val input = scala.io.StdIn.readLine("YOUR OPTION: ")
     input match {
       case "1" => // show all
-        print(ANSI_GREEN+fileController.readData()+ANSI_RESET)
+        print(ANSI_GREEN + fileController.readData() + ANSI_RESET)
         println()
-        storageControlMenu(fileController,null)
+        storageControlMenu(fileController, null)
       case "2" => // mean
       case "3" => // median
       case "4" => // mode
@@ -105,17 +114,50 @@ object Menus {
           "1) Define hourly filter.\n" +
             "2) Define daily filter.\n" +
             "3) Define weekly filter.\n" +
-            "4) Define monthly filter.\n" +
-            "5) Define \n" +
-            "6) Show Midrange based on all data from the storage.\n" +
-            "7) Define filtered list.\n"
+            "4) Define monthly filter.\n"
         )
-        storageControlMenu(fileController,null)
+        val filIn = scala.io.StdIn.readLine("YOUR OPTION: ")
+        try {
+          filIn match {
+            case "1" =>
+              val dateInput = scala.io.StdIn.readLine("Enter date and time (yyyy-MM-dd HH:mm): ")
+              val dateTime = LocalDateTime.parse(dateInput)
+              val hourlyEvents = EventSorter.hourlySort(dateTime)
+              hourlyEvents.foreach(println)
+              storageControlMenu(fileController, Option(hourlyEvents))
+            case "2" =>
+              val dateInput = scala.io.StdIn.readLine("Enter date (yyyy-MM-dd): ")
+              val date = LocalDate.parse(dateInput)
+              val dailyEvents = EventSorter.dailySort(date)
+              dailyEvents.foreach(println)
+              storageControlMenu(fileController, Option(dailyEvents))
+            case "3" =>
+              val dateInput = scala.io.StdIn.readLine("Enter date (yyyy-MM-dd): ")
+              val date = LocalDate.parse(dateInput)
+              val weeklyEvents = EventSorter.weeklySort(date)
+              weeklyEvents.foreach(println)
+              storageControlMenu(fileController, Option(weeklyEvents))
+            case "4" =>
+              val dateInput = scala.io.StdIn.readLine("Enter date (yyyy-MM): ")
+              val date = LocalDate.parse(dateInput + "-01")
+              val monthlyEvents = EventSorter.monthlySort(date)
+              monthlyEvents.foreach(println)
+              storageControlMenu(fileController, Option(monthlyEvents))
+            case _ =>
+              println("Invalid option.")
+          }
+        } catch {
+          case e: DateTimeParseException =>
+            println("Invalid date format. Please enter the date in the format yyyy-MM-dd HH:mm for option 1 or yyyy-MM-dd for options 2, 3, and 4.")
+          case _: Throwable =>
+            println("An unexpected error occurred.")
+        }
+        storageControlMenu(fileController, null)
     }
 
   }
 
-  def menu(fileController: FileController, hydropowerSystem: EnergyPowerSystem,solarpowerSystem: EnergyPowerSystem,windpowerSystem: EnergyPowerSystem): Unit = {
+  def menu(fileController: FileController, hydropowerSystem: EnergyPowerSystem, solarpowerSystem: EnergyPowerSystem, windpowerSystem: EnergyPowerSystem): Unit = {
     // main menu options
     println("THIS IS REPS COMMANDS CONTROL")
     println("Enter the number of the command what you need:")
@@ -130,19 +172,19 @@ object Menus {
     input match {
       case "1" =>
         // solar
-        menu(fileController, hydropowerSystem,solarpowerSystem,windpowerSystem)
+        menu(fileController, hydropowerSystem, solarpowerSystem, windpowerSystem)
       case "2" =>
         // wind
-        menu(fileController, hydropowerSystem,solarpowerSystem,windpowerSystem)
+        menu(fileController, hydropowerSystem, solarpowerSystem, windpowerSystem)
       case "3" =>
         hydropowerControlMenu(hydropowerSystem, fileController)
-        menu(fileController, hydropowerSystem,solarpowerSystem,windpowerSystem)
+        menu(fileController, hydropowerSystem, solarpowerSystem, windpowerSystem)
       case "4" =>
-        storageControlMenu(fileController,null)
-        menu(fileController, hydropowerSystem,solarpowerSystem,windpowerSystem)
+        storageControlMenu(fileController, null)
+        menu(fileController, hydropowerSystem, solarpowerSystem, windpowerSystem)
       case "5" =>
         dataControlMenu(fileController)
-        menu(fileController, hydropowerSystem,solarpowerSystem,windpowerSystem)
+        menu(fileController, hydropowerSystem, solarpowerSystem, windpowerSystem)
       case _ => // nothing
     }
   }
@@ -150,9 +192,6 @@ object Menus {
   def dataControlMenu(fileController: FileController): Unit = { // Menu of the data analysis commands
 
   }
-
-
-
 
 
 }
