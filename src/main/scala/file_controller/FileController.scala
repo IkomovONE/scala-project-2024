@@ -4,6 +4,7 @@ import com.github.tototoshi.csv.{CSVReader, CSVWriter}
 import event.{Event, EventContainer}
 import glob_val.GlobalValues.{defaultStorageCapacity, storageCapacity}
 import plant.HydropowerPlant
+import plant.WindpowerPlant
 import system.EnergyPowerSystem
 
 import java.io.File
@@ -124,7 +125,7 @@ class FileController(filePath: String) { //  class for which works with files
               }
             case "W" => // !without class specific logic
               if (!windPowerSystem.plants.exists(_.plantName == name)) {
-                windPowerSystem.addPlant(new HydropowerPlant(name, energy.toInt))
+                windPowerSystem.addPlant(new WindpowerPlant(name, energy.toInt))
               }
             case "S" => // !without class specific logic
               if (!solarPowerSystem.plants.exists(_.plantName == name)) {

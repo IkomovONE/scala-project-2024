@@ -4,6 +4,7 @@ import event.{Event, EventContainer}
 import file_controller.FileController
 import glob_val.GlobalValues.{ANSI_GREEN, ANSI_RESET, storageCapacity}
 import plant.HydropowerPlant
+import plant.WindpowerPlant
 import sorter.Calculator.{calculateMeanEnergy, calculateMedianEnergy, calculateMidrangeEnergy, calculateModeEnergy, calculateRangeEnergy}
 import sorter.EventSorter
 import system.EnergyPowerSystem
@@ -64,6 +65,76 @@ object Menus {
               case 4 => //Reduce turbine speed
                 selectedPlant.reduceTurbineSpeed
                 println(s"${ANSI_GREEN}Reduced turbine speed of plant: ${selectedPlant.plantName}. ${ANSI_RESET}")
+              case 5 => //Disconnect plant
+                //
+                system.disconnect(selectedPlant)
+                println(s"${ANSI_GREEN}Disconnected plant: ${selectedPlant.plantName} from the system. ${ANSI_RESET}")
+                println("")
+                break()
+
+            }
+          } else {
+            break()
+          }
+          println("")
+        }
+      }
+    } catch {
+      case _: NumberFormatException =>
+        println("Invalid input format. Please enter an integer.")
+    }
+  }
+
+  def windpowerControlMenu(system: EnergyPowerSystem, fileController: FileController): Unit = {
+    println("Choose Windpower plant:")
+    val plants = system.plants
+    for ((plant, index) <- plants.zipWithIndex) {
+      println(s"${index + 1}. ${plant.plantName}")
+    }
+    print("Plant number: ")
+
+    def isValidChoice(input: String): Boolean = {
+      Try(input.toInt).filter(choice => choice >= 1 && choice <= 5).isSuccess
+    }
+
+    try {
+      val userPlantInput = scala.io.StdIn.readInt()
+
+
+      breakable {
+        while (userPlantInput >= 1 && userPlantInput <= plants.length) {
+
+          val selectedPlant: WindpowerPlant = plants(userPlantInput - 1).asInstanceOf[WindpowerPlant]
+
+
+          println(s"Choose ${selectedPlant.plantName} command option :\n" +
+            "1) Check quality.\n" +
+            "2) Generate Energy.\n" +
+            "3) Turn structure right 10 degrees.\n" +
+            "4) Turn structure left 10 degrees.\n" +
+            "5) Disconnect plant.\n" +
+            "Enter any other button to exit.")
+          print("Command: ")
+
+          val userChoiceInput = scala.io.StdIn.readLine()
+
+          if (isValidChoice(userChoiceInput)) {
+            val userChoice = userChoiceInput.toInt
+            userChoice match {
+              case 1 => // Check quality
+                println(s"${ANSI_GREEN}Quality of plant: ${selectedPlant.plantName} is ${selectedPlant.quality}. ${ANSI_RESET}")
+              case 2 => // Generate Energy
+
+                var generatedEnergy: Int = selectedPlant.generateEnergy()
+                storageCapacity = storageCapacity - generatedEnergy
+                fileController.writeData(selectedPlant.plantName, "H", LocalDateTime.now(), generatedEnergy, selectedPlant.quality)
+                println(s"${ANSI_GREEN}Generated energy of plant: ${selectedPlant.plantName} is ${generatedEnergy}. ${ANSI_RESET}")
+              case 3 => //Increase turbine speed
+                selectedPlant.turnAngleRight
+                println(s"${ANSI_GREEN}Turned structure 10 degrees right: ${selectedPlant.plantName}. ${ANSI_RESET}")
+              case 4 => //Reduce turbine speed
+                selectedPlant.turnAngleLeft
+                println(s"${ANSI_GREEN}Turned structure 10 degrees left: ${selectedPlant.plantName}. ${ANSI_RESET}")
               case 5 => //Disconnect plant
                 //
                 system.disconnect(selectedPlant)
