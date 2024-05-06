@@ -13,6 +13,7 @@ object Main {
     var solarpowerSystem = new EnergyPowerSystem
     var windpowerSystem = new EnergyPowerSystem
 
+    // loading data from the file
     val allSystems:Array[EnergyPowerSystem] = fileController.loadData()
 
     if(allSystems.headOption.exists(_.plants.nonEmpty)){
@@ -29,7 +30,6 @@ object Main {
 
     }
 
-
     val hydropowerPlant1 = new HydropowerPlant("HPP-1", 100)
     val hydropowerPlant2 = new HydropowerPlant("HPP-2", 200)
     val hydropowerPlant3 = new HydropowerPlant("HPP-3", 300)
@@ -37,10 +37,6 @@ object Main {
     hydropowerSystem.addPlant(hydropowerPlant1)
     hydropowerSystem.addPlant(hydropowerPlant2)
     hydropowerSystem.addPlant(hydropowerPlant3)
-
-    // loading data from the file
-
-
 
     menu(fileController, hydropowerSystem,solarpowerSystem,windpowerSystem)
   }

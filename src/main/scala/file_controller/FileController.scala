@@ -1,6 +1,7 @@
 package file_controller
 
 import com.github.tototoshi.csv.{CSVReader, CSVWriter}
+import event.{Event, EventContainer}
 import glob_val.GlobalValues.{defaultStorageCapacity, storageCapacity}
 import plant.HydropowerPlant
 import system.EnergyPowerSystem
@@ -20,7 +21,7 @@ class FileController(filePath: String) { //  class for which works with files
       val csvReader = CSVReader.open(outputFile)
       try {
         val rows = csvReader.all()
-        if (rows.isEmpty || !rows.head.equals(List("Name", "Type", "Date", "Energy", "Capacity","Quality"))) {
+        if (rows.isEmpty || !rows.head.equals(List("Name", "Type", "Date", "Energy", "Capacity", "Quality"))) {
           clearAndCreateHeader()
         }
       } finally {
@@ -34,7 +35,7 @@ class FileController(filePath: String) { //  class for which works with files
   private def createHeader(): Unit = {
     try {
       val csvWriter = CSVWriter.open(outputFile)
-      csvWriter.writeRow(List("Name", "Type", "Date", "Energy", "Capacity","Quality"))
+      csvWriter.writeRow(List("Name", "Type", "Date", "Energy", "Capacity", "Quality"))
       csvWriter.close()
     } catch {
       case NonFatal(e) => println(s"Error writing header row: ${e.getMessage}")
@@ -51,13 +52,13 @@ class FileController(filePath: String) { //  class for which works with files
     }
   }
 
-  def writedata(name: String, eType: String, date: LocalDate, energy: Int, quality:Int): Unit = {
+  def writedata(name: String, eType: String, date: LocalDate, energy: Int, quality: Int): Unit = {
     val formattedDate = date.toString
     val formattedEnergy = energy.toString
     val formattedCapacity = s"${storageCapacity}/${defaultStorageCapacity}"
     val csvWriter = CSVWriter.open(outputFile, append = true)
     val formattedQuality = quality.toString
-    csvWriter.writeRow(List(name, eType, formattedDate, formattedEnergy, formattedCapacity,formattedQuality))
+    csvWriter.writeRow(List(name, eType, formattedDate, formattedEnergy, formattedCapacity, formattedQuality))
     csvWriter.close()
   }
 
@@ -74,8 +75,29 @@ class FileController(filePath: String) { //  class for which works with files
       csvReader.close()
     }
   }
+  def readEvents():Unit = {
+    val csvReader = CSVReader.open(filePath)
+    try {
+    val rows = csvReader.all()
+    // Skip header line
+    val dataRows = rows.drop(1)
+    dataRows.map { row =>
+    val Array(plantName, type_, dateString, energyStr, capacityStr, qualityStr) = row.toArray
+    val date = LocalDate.parse(dateString)
+    val energy = energyStr.toInt
+    val capacity = capacityStr.split("/")(0).toInt
+    val quality = qualityStr.toInt
+    EventContainer.addEvent( new Event(plantName,type_,date,energy,capacity,quality))
+  }.toArray
+  } catch {
+    case NonFatal(e) =>
+    println(s"Error reading data from file: ${e.getMessage}")
+  } finally {
+    csvReader.close()
+  }
+  }
 
-  def loadData(): Array[EnergyPowerSystem] = { // solar, wind ,  hydro
+  def loadData(): Array[EnergyPowerSystem] = { // solar, wind, hydro
     val solarPowerSystem = new EnergyPowerSystem()
     val windPowerSystem = new EnergyPowerSystem()
     val hydroPowerSystem = new EnergyPowerSystem()
@@ -86,24 +108,26 @@ class FileController(filePath: String) { //  class for which works with files
       for (row <- rows.tail) { // Skip header row
         val cols = row.map(_.trim)
         if (cols.length == 6) {
-          val Array(name, type_, date, energy, capacity,quality) = cols.toArray
+          val Array(name, type_, date, energy, capacity, quality) = cols.toArray
           val Array(currentCapacityStr, totalCapacityStr) = capacity.split("/")
           defaultStorageCapacity = totalCapacityStr.toInt
           type_ match {
             case "H" =>
-              if(!hydroPowerSystem.plants.exists(_.plantName == name)){
+              if (!hydroPowerSystem.plants.exists(_.plantName == name)) {
                 val hydropowerPlant = new HydropowerPlant(name, energy.toInt)
                 hydropowerPlant.quality = quality.toInt
                 hydroPowerSystem.addPlant(hydropowerPlant)
-              } else{
-                hydroPowerSystem.plants.find(_.plantName == name).get.quality = quality.toInt
+              } else {
+                if (hydroPowerSystem.plants.find(_.plantName == name).get.quality > quality.toInt) {
+                  hydroPowerSystem.plants.find(_.plantName == name).get.quality = quality.toInt
+                }
               }
-            case "W" =>
-              if(!windPowerSystem.plants.exists(_.plantName == name)){
+            case "W" => // !without class specific logic
+              if (!windPowerSystem.plants.exists(_.plantName == name)) {
                 windPowerSystem.addPlant(new HydropowerPlant(name, energy.toInt))
               }
-            case "S" =>
-              if(!solarPowerSystem.plants.exists(_.plantName == name)){
+            case "S" => // !without class specific logic
+              if (!solarPowerSystem.plants.exists(_.plantName == name)) {
                 solarPowerSystem.addPlant(new HydropowerPlant(name, energy.toInt))
               }
           }
@@ -117,6 +141,6 @@ class FileController(filePath: String) { //  class for which works with files
         println(s"Error reading data from file: ${e.getMessage}")
     }
 
-    Array(solarPowerSystem,windPowerSystem,hydroPowerSystem);
+    Array(solarPowerSystem, windPowerSystem, hydroPowerSystem);
   }
 }
