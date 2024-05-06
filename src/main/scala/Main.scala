@@ -1,6 +1,7 @@
 import file_controller.FileController
 import menu.Menus.menu
 import plant.HydropowerPlant
+import plant.WindpowerPlant
 import system.{EnergyPowerSystem}
 
 
@@ -38,9 +39,19 @@ object Main {
     val hydropowerPlant2 = new HydropowerPlant("HPP-2", 200)
     val hydropowerPlant3 = new HydropowerPlant("HPP-3", 300)
 
+
+    val windpowerPlant1 = new WindpowerPlant("WPP-1", 100)
+    val windpowerPlant2 = new WindpowerPlant("WPP-2", 200)
+    val windpowerPlant3 = new WindpowerPlant("WPP-3", 300)
+
     hydropowerSystem.addPlant(hydropowerPlant1)
     hydropowerSystem.addPlant(hydropowerPlant2)
     hydropowerSystem.addPlant(hydropowerPlant3)
+
+
+    hydropowerSystem.addPlant(windpowerPlant1)
+    hydropowerSystem.addPlant(windpowerPlant2)
+    hydropowerSystem.addPlant(windpowerPlant3)
 
     menu(fileController, hydropowerSystem,solarpowerSystem,windpowerSystem)
   }
