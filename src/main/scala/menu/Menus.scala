@@ -277,6 +277,7 @@ object Menus {
         menu(fileController, hydropowerSystem, solarpowerSystem, windpowerSystem)
       case "2" =>
         // wind
+        windpowerControlMenu(hydropowerSystem, fileController)
         menu(fileController, hydropowerSystem, solarpowerSystem, windpowerSystem)
       case "3" =>
         hydropowerControlMenu(hydropowerSystem, fileController)
