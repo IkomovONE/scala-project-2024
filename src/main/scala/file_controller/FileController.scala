@@ -20,7 +20,7 @@ class FileController(filePath: String) { //  class for which works with files
       val csvReader = CSVReader.open(outputFile)
       try {
         val rows = csvReader.all()
-        if (rows.isEmpty || !rows.head.equals(List("Name", "Type", "Date", "Energy", "Capacity"))) {
+        if (rows.isEmpty || !rows.head.equals(List("Name", "Type", "Date", "Energy", "Capacity","Quality"))) {
           clearAndCreateHeader()
         }
       } finally {
@@ -34,7 +34,7 @@ class FileController(filePath: String) { //  class for which works with files
   private def createHeader(): Unit = {
     try {
       val csvWriter = CSVWriter.open(outputFile)
-      csvWriter.writeRow(List("Name", "Type", "Date", "Energy", "Capacity"))
+      csvWriter.writeRow(List("Name", "Type", "Date", "Energy", "Capacity","Quality"))
       csvWriter.close()
     } catch {
       case NonFatal(e) => println(s"Error writing header row: ${e.getMessage}")
@@ -51,12 +51,13 @@ class FileController(filePath: String) { //  class for which works with files
     }
   }
 
-  def writedata(name: String, eType: String, date: LocalDate, energy: Int): Unit = {
+  def writedata(name: String, eType: String, date: LocalDate, energy: Int, quality:Int): Unit = {
     val formattedDate = date.toString
     val formattedEnergy = energy.toString
     val formattedCapacity = s"${storageCapacity}/${defaultStorageCapacity}"
     val csvWriter = CSVWriter.open(outputFile, append = true)
-    csvWriter.writeRow(List(name, eType, formattedDate, formattedEnergy, formattedCapacity))
+    val formattedQuality = quality.toString
+    csvWriter.writeRow(List(name, eType, formattedDate, formattedEnergy, formattedCapacity,formattedQuality))
     csvWriter.close()
   }
 
@@ -74,24 +75,39 @@ class FileController(filePath: String) { //  class for which works with files
     }
   }
 
-  def loadData(): Array[EnergyPowerSystem] = { // solar, wind hydro
-    val energyPowerSystem = new EnergyPowerSystem()
+  def loadData(): Array[EnergyPowerSystem] = { // solar, wind ,  hydro
+    val solarPowerSystem = new EnergyPowerSystem()
+    val windPowerSystem = new EnergyPowerSystem()
+    val hydroPowerSystem = new EnergyPowerSystem()
 
     try {
       val csvReader = CSVReader.open(outputFile)
       val rows = csvReader.all()
       for (row <- rows.tail) { // Skip header row
         val cols = row.map(_.trim)
-        if (cols.length == 5) {
-          val Array(name, type_, date, energy, capacity) = cols.toArray
+        if (cols.length == 6) {
+          val Array(name, type_, date, energy, capacity,quality) = cols.toArray
           val Array(currentCapacityStr, totalCapacityStr) = capacity.split("/")
-          storageCapacity = currentCapacityStr.toInt
           defaultStorageCapacity = totalCapacityStr.toInt
           type_ match {
             case "H" =>
-              val hydropowerPlant = new HydropowerPlant(name, energy.toInt)
-              energyPowerSystem.addPlant(hydropowerPlant)
+              if(!hydroPowerSystem.plants.exists(_.plantName == name)){
+                val hydropowerPlant = new HydropowerPlant(name, energy.toInt)
+                hydropowerPlant.quality = quality.toInt
+                hydroPowerSystem.addPlant(hydropowerPlant)
+              } else{
+                hydroPowerSystem.plants.find(_.plantName == name).get.quality = quality.toInt
+              }
+            case "W" =>
+              if(!windPowerSystem.plants.exists(_.plantName == name)){
+                windPowerSystem.addPlant(new HydropowerPlant(name, energy.toInt))
+              }
+            case "S" =>
+              if(!solarPowerSystem.plants.exists(_.plantName == name)){
+                solarPowerSystem.addPlant(new HydropowerPlant(name, energy.toInt))
+              }
           }
+          storageCapacity = storageCapacity - energy.toInt
         } else {
           println(s"Ignoring invalid row: ${cols.mkString(", ")}")
         }
@@ -101,6 +117,6 @@ class FileController(filePath: String) { //  class for which works with files
         println(s"Error reading data from file: ${e.getMessage}")
     }
 
-    Array(energyPowerSystem);
+    Array(solarPowerSystem,windPowerSystem,hydroPowerSystem);
   }
 }

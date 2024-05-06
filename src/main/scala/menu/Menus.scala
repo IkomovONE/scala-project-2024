@@ -51,7 +51,7 @@ object Menus {
 
               var generatedEnergy: Int = selectedPlant.generateEnergy()
               storageCapacity = storageCapacity - generatedEnergy
-              fileController.writedata(selectedPlant.plantName, "H", LocalDate.now(), generatedEnergy)
+              fileController.writedata(selectedPlant.plantName, "H", LocalDate.now(), generatedEnergy,selectedPlant.quality)
               println(s"${ANSI_GREEN}Generated energy of plant: ${selectedPlant.plantName} is ${generatedEnergy}. ${ANSI_RESET}")
             case 3 => //Increase turbine speed
               selectedPlant.increaseTurbineSpeed

@@ -9,9 +9,26 @@ object Main {
 
     val fileController = new FileController("data.csv")
 
-    val hydropowerSystem = new EnergyPowerSystem
-    val solarpowerPlant = new EnergyPowerSystem
-    val windpowerPlant = new EnergyPowerSystem
+    var hydropowerSystem = new EnergyPowerSystem
+    var solarpowerSystem = new EnergyPowerSystem
+    var windpowerSystem = new EnergyPowerSystem
+
+    val allSystems:Array[EnergyPowerSystem] = fileController.loadData()
+
+    if(allSystems.headOption.exists(_.plants.nonEmpty)){
+      //solar
+      solarpowerSystem = allSystems.headOption.orNull
+    }
+    if(allSystems.lift(1).exists(_.plants.nonEmpty)){
+      //wind
+      windpowerSystem = allSystems.lift(1).orNull
+    }
+    if(allSystems.lift(2).exists(_.plants.nonEmpty)){
+      //hydro
+      hydropowerSystem = allSystems.lift(2).orNull
+
+    }
+
 
     val hydropowerPlant1 = new HydropowerPlant("HPP-1", 100)
     val hydropowerPlant2 = new HydropowerPlant("HPP-2", 200)
@@ -21,7 +38,10 @@ object Main {
     hydropowerSystem.addPlant(hydropowerPlant2)
     hydropowerSystem.addPlant(hydropowerPlant3)
 
+    // loading data from the file
 
-    menu(fileController, hydropowerSystem,solarpowerPlant,windpowerPlant)
+
+
+    menu(fileController, hydropowerSystem,solarpowerSystem,windpowerSystem)
   }
 }
