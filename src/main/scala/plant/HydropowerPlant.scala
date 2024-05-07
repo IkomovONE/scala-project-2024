@@ -6,12 +6,12 @@ class HydropowerPlant(plantName: String, var generatedEnergy: Int) extends Plant
 
   var turbineSpeed = 100
 
-  def increaseTurbineSpeed: Unit = {
+  def increaseTurbineSpeed(): Unit = {
     turbineSpeed = turbineSpeed + 10
     println(ANSI_GREEN + "Increase turbine speed on 10%." + ANSI_RESET)
   }
 
-  def reduceTurbineSpeed: Unit = {
+  def reduceTurbineSpeed(): Unit = {
     turbineSpeed = turbineSpeed - 10
     println(ANSI_GREEN + "Reduce turbine speed on 10%." + ANSI_RESET)
   }

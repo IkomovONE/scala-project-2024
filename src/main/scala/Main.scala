@@ -1,11 +1,12 @@
 import file_controller.FileController
 import menu.Menus.menu
-import plant.HydropowerPlant
-import plant.WindpowerPlant
-import system.{EnergyPowerSystem}
+import plant.{HydropowerPlant, SolarpowerPlant, WindpowerPlant}
+import system.EnergyPowerSystem
 
 
-//Aleksandr Ivanov
+//  Aleksandr Ivanov
+//  Daniil Komov
+//  Vera Stojcheva
 object Main {
 
   def main(args: Array[String]): Unit = {
@@ -44,14 +45,21 @@ object Main {
     val windpowerPlant2 = new WindpowerPlant("WPP-2", 200)
     val windpowerPlant3 = new WindpowerPlant("WPP-3", 300)
 
+    val solarpowerPlant1 = new SolarpowerPlant("SPP-1", 100)
+    val solarpowerPlant2 = new SolarpowerPlant("SPP-2", 200)
+    val solarpowerPlant3 = new SolarpowerPlant("SPP-3", 300)
+
     hydropowerSystem.addPlant(hydropowerPlant1)
     hydropowerSystem.addPlant(hydropowerPlant2)
     hydropowerSystem.addPlant(hydropowerPlant3)
 
+    windpowerSystem.addPlant(windpowerPlant1)
+    windpowerSystem.addPlant(windpowerPlant2)
+    windpowerSystem.addPlant(windpowerPlant3)
 
-    hydropowerSystem.addPlant(windpowerPlant1)
-    hydropowerSystem.addPlant(windpowerPlant2)
-    hydropowerSystem.addPlant(windpowerPlant3)
+    solarpowerSystem.addPlant(solarpowerPlant1)
+    solarpowerSystem.addPlant(solarpowerPlant2)
+    solarpowerSystem.addPlant(solarpowerPlant3)
 
     menu(fileController, hydropowerSystem,solarpowerSystem,windpowerSystem)
   }

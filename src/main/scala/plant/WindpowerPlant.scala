@@ -40,10 +40,10 @@ class WindpowerPlant(plantName: String, var generatedEnergy: Int) extends Plant(
 
 
   override def generateEnergy(): Int = {
-    generatedEnergy = generatedEnergy * quality / 100000
+    generatedEnergy = generatedEnergy * quality / 1000
     decrementQuality()
     totalGeneratedEnergy = totalGeneratedEnergy + generatedEnergy
-    if(isGoodQuality){
+    if(!isGoodQuality){
       print(ANSI_RED+"Please disconnect the plant to avoid low efficiency energy generation and failure.\n"+ANSI_RESET)
     }
     generatedEnergy
